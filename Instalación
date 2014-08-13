@@ -1,0 +1,28 @@
+1) Instalar paquetes necesarios:
+apt-get install xz-utils ulogd ulogd-pcap wireshark
+
+2) Crear partición en el disco para Logs y formatearla
+cfdisk /dev/sdX           (sin boot, formato Linux)
+mkfs.ext4 /dev/sdX1
+
+3) Crear directorios para Logs+Script y montar el disco en dicho lugar.
+mkdir /mnt/logs/sdX
+mkdir /mnt/logs/scripts
+mount /dev/sdX1 /mnt/logs/sdX
+
+4) Crear scripts (rotation y logger) en /mnt/logs/scripts
+
+5) Editar /etc/ulogd.conf y descomentar el último plugin (pcap) y agregar el directorio donde serán almacenados los pcap.
+
+6) Cronear los 2 scripts:
+vim /etc/cron.d/sisp-logger
+0 * * * * root /mnt/logs/scripts/AutoRot.sh
+0 * * * * root /mnt/logs/scripts/sisp-logger.sh 
+
+7) Ejecutar los scripts:
+
+bash /mnt/logs/scripts/AutoRot.sh
+bash /mnt/logs/scripts/sisp-logger.sh
+
+8) Reiniciar ULOG:
+/etc/init.d/ulogd restart
