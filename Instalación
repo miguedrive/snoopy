@@ -15,9 +15,26 @@ mount /dev/sdX1 /mnt/logs/sdX
 5) Editar /etc/ulogd.conf y descomentar el último plugin (pcap) y agregar el directorio donde serán almacenados los pcap.
 
 6) Cronear los 2 scripts:
-vim /etc/cron.d/sisp-logger
+vim /etc/cron.d/sisp-logger1
 0 * * * * root /mnt/logs/scripts/AutoRot.sh
+vim /etc/cron.d/sisp-logger2
 0 * * * * root /mnt/logs/scripts/sisp-logger.sh 
+
+6b) Agregarlo en sequreisp_post.sh !  #Ver si no es mejor ponerlo acá...
+vim /opt/sequreisp/etc/sequreisp_post.sh
+
+# Regla iptables para capturar el tráfico TCP & UDP
+
+iptables -I FORWARD -m state --state NEW -j ULOG
+
+# Obtener los RST Connections, para saber en que momento se cerró la conexión.
+iptables -I FORWARD --protocol tcp --tcp-flags ALL RST,ACK -j ULOG
+
+# Capturar el string "GET /" de HTTP
+iptables -I FORWARD -m string --hex-string "|47 45 54 20 2F|" --algo bm -j ULOG
+
+
+
 
 7) Ejecutar los scripts:
 
